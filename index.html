@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Device Checker</title>
   <style>
     body {
@@ -31,29 +31,45 @@
 <body>
 
   <h1>Check Device by Serial Number</h1>
-  <input type="text" id="serialInput" placeholder="Enter Serial Number">
+  <input type="text" id="serialInput" placeholder="Enter Serial Number" />
   <button onclick="checkSerial()">Search</button>
 
   <div id="result"></div>
 
   <script>
-    const CSV_URL = "https://raw.githubusercontent.com/aleksanda24.salic/security_devices_list/main/devices.csv";
+    const CSV_URL = "https://raw.githubusercontent.com/aleksandar24salic/security_devices_list/main/devices.csv";
 
     async function fetchCSVData() {
       const response = await fetch(CSV_URL);
       const text = await response.text();
-      const lines = text.trim().split('\n').slice(1); // Skip header
-      return lines.map(line => {
-        const [full_name, device_name, serial_number] = line.split(',');
-        return { full_name, device_name, serial_number };
-      });
+
+      const lines = text.trim().split('\n');
+      const headers = lines[0].split(',').map(h => h.trim());
+      const data = [];
+
+      for (let i = 1; i < lines.length; i++) {
+        const cols = lines[i].split(',').map(c => c.trim());
+        let entry = {};
+        headers.forEach((header, idx) => {
+          entry[header] = cols[idx] || "";
+        });
+        data.push(entry);
+      }
+      return data;
     }
 
     async function checkSerial() {
       const serialInput = document.getElementById("serialInput").value.trim();
       const resultDiv = document.getElementById("result");
-      const data = await fetchCSVData();
 
+      if (!serialInput) {
+        resultDiv.style.display = 'block';
+        resultDiv.textContent = "Please enter a serial number.";
+        resultDiv.className = 'not-found';
+        return;
+      }
+
+      const data = await fetchCSVData();
       const found = data.find(entry => entry.serial_number.toUpperCase() === serialInput.toUpperCase());
 
       if (found) {
