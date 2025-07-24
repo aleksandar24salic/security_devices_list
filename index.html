@@ -40,7 +40,10 @@
     const CSV_URL = "https://raw.githubusercontent.com/aleksandar24salic/security_devices_list/main/devices.csv";
 
     async function fetchCSVData() {
-      const response = await fetch(CSV_URL);
+      // Add cache buster query param to prevent browser caching
+      const cacheBustedUrl = CSV_URL + "?t=" + new Date().getTime();
+
+      const response = await fetch(cacheBustedUrl);
       const text = await response.text();
 
       const lines = text.trim().split('\n');
@@ -78,10 +81,3 @@
       } else {
         resultDiv.textContent = `❌ Serial number not found`;
         resultDiv.className = 'not-found';
-      }
-      resultDiv.style.display = 'block';
-    }
-  </script>
-
-</body>
-</html>
